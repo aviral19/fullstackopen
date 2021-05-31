@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 const Header = (props) => {
-  console.log(props)
   return(
     <div>
       <h1>{props.course.name}</h1>
