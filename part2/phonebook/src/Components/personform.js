@@ -3,7 +3,7 @@ import React from 'react';
 const PersonForm = ({ addPerson,
     newName,
     newNumber,
-     handleNameChange, handleNumberChange }) => {
+    handleNameChange, handleNumberChange }) => {
     return (
     <div>
         <form onSubmit = {addPerson}>

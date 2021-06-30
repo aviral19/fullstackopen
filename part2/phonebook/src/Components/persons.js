@@ -3,7 +3,7 @@ import personService from "../personService";
 import Person from './person'
 
 
-const Persons = ({persons, setPersons, filterName }) => {
+const Persons = ({persons, setPersons, filterName, message, setMessage }) => {
 
   useEffect(() => {
     personService.getAll().then(persons => {
@@ -18,6 +18,13 @@ const Persons = ({persons, setPersons, filterName }) => {
         .then(personObjects => {
           setPersons(personObjects)
         })
+      })
+      .catch((error) => {
+        console.log(error)
+        setMessage({message: `Information of ${person.name} has already been removed from server`, className: 'error'})
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000);
       })
     }
   }

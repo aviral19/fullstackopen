@@ -15,6 +15,7 @@ const App = () => {
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber] = useState('')
   const [ filterName, setFilterName] = useState('')
+  const [ message, setMessage] = useState(null)
 
   useEffect(() => {
     // console.log('effect')
@@ -31,23 +32,67 @@ const App = () => {
     //   })
   }, [])
 
+  const UpdateMessage = ({ notify }) => {
+    if(notify === null){
+      return null
+    }
+    const {message, className} = notify
+    let messageStyle = {}
+    if(className === 'update'){
+      messageStyle = {
+        color: 'green',
+        fontSize: 20,
+        background: 'lightgrey',
+        borderStyle: 'solid',
+        borderRadius: 5,
+        padding: 10,
+        marginBottom: 10
+      }
+    }
+    else{
+      messageStyle = {
+        color: 'red',
+        fontSize: 20,
+        background: 'lightgrey',
+        borderStyle: 'solid',
+        borderRadius: 5,
+        padding: 10,
+        marginBottom: 10
+      }
+    }
+    return (
+      <div style = {messageStyle}>
+        {message}
+      </div>
+    )
+  }
+
+
+
   const updatePerson = (existingPersonID,nameObject) => {
     if (window.confirm(`${nameObject.name} is already added to phonebook.
     replace the old number with new one?`)){
-      console.log(nameObject.name)
-      console.log(nameObject.number)
-      console.log(existingPersonID)
       personService
         .updatePerson(existingPersonID, nameObject)
         .then(returnedPerson => {
-          console.log(returnedPerson)
+          setMessage({message: `Added ${newName}`, className: 'update'})
           setPersons(persons.map(person => person.id !== existingPersonID ? person : returnedPerson))
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000);
+        })
+        .catch((error) => {
+          setMessage({message: `Information of ${nameObject.name} has already been removed from server`, className: 'error'})
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000);
         })
     }
   }
 
   const addPerson = (event) => {
     event.preventDefault()
+
     const nameObject = {
       name: newName,
       number: newNumber
@@ -62,7 +107,18 @@ const App = () => {
       personService
         .createPerson(nameObject)
         .then(person => {
+          setMessage({message: `Added ${newName}`, className: 'update'})
           setPersons(persons.concat(person))
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000);
+        })
+        .catch((error) => {
+          
+          setMessage({message: `Information of ${nameObject.name} has already been removed from server`, className: 'error'})
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000);
         })
       // axios
       //   .post('http://localhost:3001/persons', nameObject)
@@ -72,7 +128,8 @@ const App = () => {
       //   })
       setNewName('')
       setNewNumber('')
-    }
+      
+  }
   }
 
 
@@ -84,6 +141,7 @@ const App = () => {
     setNewNumber(event.target.value)
   }
 
+  
   // const filtered = persons.filter((person) =>
   //   person.name.toLowerCase().includes(filterName.toLowerCase())
   // );
@@ -91,14 +149,18 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <UpdateMessage notify = {message} />
       <Filter filterName = {filterName} setFilterName = {setFilterName} />
       <PersonForm addPerson = {addPerson} 
         newName = {newName}
         newNumber = {newNumber}
         handleNameChange = {handleNameChange}
-        handleNumberChange = {handleNumberChange} />
+        handleNumberChange = {handleNumberChange} 
+        />
       <h2>Numbers</h2>
-      <Persons persons = {persons} setPersons = {setPersons} filterName = {filterName} />
+      <Persons persons = {persons} setPersons = {setPersons} filterName = {filterName}
+      message = {message}
+      setMessage = {setMessage} />
       
     </div>
   )
