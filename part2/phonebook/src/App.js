@@ -3,7 +3,7 @@ import axios from 'axios'
 import Filter from './Components/filter'
 import Persons from './Components/persons'
 import PersonForm from './Components/personform'
-
+import personService from './personService'
 
 const App = () => {
   const [ persons, setPersons ] = useState([
@@ -17,27 +17,59 @@ const App = () => {
   const [ filterName, setFilterName] = useState('')
 
   useEffect(() => {
-    console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        console.log('promise fulfilled')
-        setPersons(response.data)
+    // console.log('effect')
+    personService
+      .getAll()
+      .then(person => {
+        setPersons(person)
       })
+    // axios
+    //   .get('http://localhost:3001/persons')
+    //   .then(response => {
+    //     console.log('promise fulfilled')
+    //     setPersons(response.data)
+    //   })
   }, [])
+
+  const updatePerson = (existingPersonID,nameObject) => {
+    if (window.confirm(`${nameObject.name} is already added to phonebook.
+    replace the old number with new one?`)){
+      console.log(nameObject.name)
+      console.log(nameObject.number)
+      console.log(existingPersonID)
+      personService
+        .updatePerson(existingPersonID, nameObject)
+        .then(returnedPerson => {
+          console.log(returnedPerson)
+          setPersons(persons.map(person => person.id !== existingPersonID ? person : returnedPerson))
+        })
+    }
+  }
 
   const addPerson = (event) => {
     event.preventDefault()
-    if(persons.indexOf(newName) !== -1){
-      alert(`${newName} is already added to phonebook`)
+    const nameObject = {
+      name: newName,
+      number: newNumber
+    }
+
+    if(persons.find((person) => person.name === newName)){
+      const existingPerson = persons.find((person) => person.name === newName)
+      // console.log('reaches here')
+      updatePerson(existingPerson.id, nameObject)
     }
     else{
-      const nameObject = {
-        name: newName,
-        number: newNumber
-      }
-      
-      setPersons(persons.concat(nameObject))
+      personService
+        .createPerson(nameObject)
+        .then(person => {
+          setPersons(persons.concat(person))
+        })
+      // axios
+      //   .post('http://localhost:3001/persons', nameObject)
+      //   .then(response => {
+      //     console.log(response.data)
+      //     setPersons(persons.concat(response.data))
+      //   })
       setNewName('')
       setNewNumber('')
     }
@@ -52,9 +84,9 @@ const App = () => {
     setNewNumber(event.target.value)
   }
 
-  const filtered = persons.filter((person) =>
-    person.name.toLowerCase().includes(filterName.toLowerCase())
-  );
+  // const filtered = persons.filter((person) =>
+  //   person.name.toLowerCase().includes(filterName.toLowerCase())
+  // );
 
   return (
     <div>
@@ -66,7 +98,7 @@ const App = () => {
         handleNameChange = {handleNameChange}
         handleNumberChange = {handleNumberChange} />
       <h2>Numbers</h2>
-      <Persons filtered = {filtered} />
+      <Persons persons = {persons} setPersons = {setPersons} filterName = {filterName} />
       
     </div>
   )
