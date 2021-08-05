@@ -114,8 +114,8 @@ const App = () => {
           }, 5000);
         })
         .catch((error) => {
-          
-          setMessage({message: `Information of ${nameObject.name} has already been removed from server`, className: 'error'})
+          console.log(error.response.data.error)
+          setMessage({message: error.response.data.error})
           setTimeout(() => {
             setMessage(null)
           }, 5000);
